@@ -5,3 +5,17 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* カスタムエッジ（線）のデフォルトスタイルと選択時のスタイル */
+.react-flow__edge.custom-edge .react-flow__edge-path {
+  stroke: #10b981;
+  stroke-width: 2;
+  transition: stroke 0.2s, stroke-width 0.2s;
+}
+
+.react-flow__edge.custom-edge.selected .react-flow__edge-path,
+.react-flow__edge.custom-edge:focus .react-flow__edge-path,
+.react-flow__edge.custom-edge:focus-visible .react-flow__edge-path {
+  stroke: #ef4444;
+  stroke-width: 4;
+}

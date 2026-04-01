@@ -45,7 +45,7 @@ export default function CanvasPage() {
             source: t.parentId,
             target: t.id,
             animated: true,
-            style: { stroke: "#10b981", strokeWidth: 2 },
+            className: "custom-edge",
           }));
         setEdges(loadedEdges);
       });
@@ -68,7 +68,7 @@ export default function CanvasPage() {
     async (params: Connection) => {
       if (!params.source || !params.target) return;
       
-      setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: "#10b981", strokeWidth: 2 } }, eds));
+      setEdges((eds) => addEdge({ ...params, animated: true, className: "custom-edge" }, eds));
       
       // Update the DB to reflect the new parent (source)
       await fetch(`/api/topics/${params.target}`, {
@@ -80,6 +80,21 @@ export default function CanvasPage() {
     [setEdges]
   );
 
+  // Handle deleting edges
+  const onEdgesDelete = useCallback(
+    async (deletedEdges: Edge[]) => {
+      for (const edge of deletedEdges) {
+        // Update the DB to remove the parent relation
+        await fetch(`/api/topics/${edge.target}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ parentId: "null" }),
+        });
+      }
+    },
+    []
+  );
+
   return (
     <div className="h-[80vh] w-full flex flex-col relative animate-in fade-in">
       <div className="mb-4">
@@ -89,7 +104,7 @@ export default function CanvasPage() {
         <div className="flex items-center gap-4 mt-2">
           <h2 className="text-2xl font-bold">思考キャンバス</h2>
           <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-            悩みのノードをドラッグして線を繋ごう
+            ノードをドラッグして線を繋ごう。線を選択してDeleteキーで削除できます。
           </span>
         </div>
       </div>
@@ -101,6 +116,7 @@ export default function CanvasPage() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onEdgesDelete={onEdgesDelete}
           onNodeDragStop={onNodeDragStop}
           fitView
         >
