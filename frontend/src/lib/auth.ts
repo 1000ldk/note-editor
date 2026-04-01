@@ -11,10 +11,18 @@ export const authOptions: NextAuthOptions = {
       name: "開発用ログイン",
       credentials: {
         email: { label: "Email", type: "email", placeholder: "test@example.com" },
+        password: { label: "Password", type: "password", placeholder: "password123" },
       },
       async authorize(credentials) {
-        const email = credentials?.email || "test@example.com";
+        const email = credentials?.email;
+        const password = credentials?.password;
+        
         console.log('Authorize called with email:', email);
+
+        if (email !== "test@example.com" || password !== "password123") {
+          console.warn("Invalid test credentials");
+          return null;
+        }
 
         try {
           let user = await prisma.user.findUnique({
