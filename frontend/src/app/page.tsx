@@ -33,15 +33,15 @@ export default function Home() {
 
   if (!session) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <h2 className="text-3xl font-bold mb-4">アイデアを、ひとつの記事に。</h2>
-        <p className="text-gray-600 mb-8 whitespace-pre-wrap text-center leading-relaxed">
+      <div className="flex flex-col items-center justify-center py-32 px-10">
+        <h2 className="text-5xl font-extrabold mb-6 font-sans text-on-surface">アイデアを、ひとつの記事に。</h2>
+        <p className="text-on-surface-variant mb-12 whitespace-pre-wrap text-center leading-loose font-serif text-xl">
           日々の悩みをメモし、AIを使った重複判定で整理。{`\n`}
           自由空間でアイデアをつなぎ合わせて、{`\n`}あなただけのnote記事の種を作りましょう。
         </p>
         <button
           onClick={() => signIn()}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-full transition-colors shadow-sm"
+          className="bg-primary hover:bg-primary-container text-white font-bold py-4 px-10 rounded-full transition-colors shadow-lg active:scale-95"
         >
           ログインして始める
         </button>
@@ -50,48 +50,64 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between border-b pb-4">
+    <div className="max-w-5xl mx-auto px-10 py-12 space-y-12 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-outline-variant/10 pb-6">
         <div>
-          <h2 className="text-2xl font-bold">こんにちは、{session.user?.name || "ユーザー"}さん</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            現在のプラン: <span className="font-semibold text-emerald-600">{plan}</span>
-            <button onClick={togglePlan} className="ml-4 text-xs underline text-gray-400 hover:text-gray-700">
+          <h2 className="text-3xl font-extrabold text-on-surface font-sans">こんにちは、{session.user?.name || "ユーザー"}さん</h2>
+          <p className="text-sm text-on-surface-variant/80 mt-2 font-medium">
+            現在のプラン: <span className="font-bold text-primary">{plan}</span>
+            <button onClick={togglePlan} className="ml-4 text-xs underline text-on-surface-variant/50 hover:text-on-surface-variant">
               (テスト用プラン切替)
             </button>
           </p>
         </div>
         <button
           onClick={() => signOut()}
-          className="text-sm text-gray-500 hover:text-gray-800"
+          className="mt-4 md:mt-0 text-sm font-semibold text-on-surface-variant/70 hover:text-on-surface transition-colors"
         >
           ログアウト
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link href="/topics" className="group block">
-          <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm group-hover:shadow-md group-hover:border-emerald-200 transition-all cursor-pointer h-full">
-            <div className="flex items-center gap-3 mb-4 text-emerald-700">
-              <PenTool size={24} />
-              <h3 className="text-xl font-bold">悩みをメモする</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Link href="/memos" className="group block">
+          <div className="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/10 whisper-shadow group-hover:border-primary/30 transition-all hover:-translate-y-1 h-full flex flex-col">
+            <div className="flex items-center gap-3 mb-5 text-primary">
+              <div className="p-3 bg-primary/10 rounded-xl">
+                <PenTool size={26} />
+              </div>
+              <h3 className="text-2xl font-bold font-sans text-on-surface">メモを書く</h3>
             </div>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              思いついたトピックや日常のちょっとした悩みを素早く記録します。<br/>
-              ※PremiumプランならAIによる重複チェックが利用可能です。
+            <p className="text-on-surface-variant/90 text-sm leading-relaxed font-serif">
+              アイデアや長文を禅スタイルで書き出せるエディタです。集中して文章を書きたいときに最適です。
+            </p>
+          </div>
+        </Link>
+
+        <Link href="/topics" className="group block">
+          <div className="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/10 whisper-shadow group-hover:border-primary/30 transition-all hover:-translate-y-1 h-full flex flex-col">
+            <div className="flex items-center gap-3 mb-5 text-primary">
+              <div className="p-3 bg-primary/10 rounded-xl">
+                <Network size={26} />
+              </div>
+              <h3 className="text-2xl font-bold font-sans text-on-surface">悩みを記録</h3>
+            </div>
+            <p className="text-on-surface-variant/90 text-sm leading-relaxed font-serif">
+              思いついたトピックや日常のちょっとした悩みを素早く記録します。PremiumプランでAI重複チェックが可能です。
             </p>
           </div>
         </Link>
 
         <Link href="/canvas" className="group block">
-          <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm group-hover:shadow-md group-hover:border-emerald-200 transition-all cursor-pointer h-full">
-            <div className="flex items-center gap-3 mb-4 text-emerald-700">
-              <Network size={24} />
-              <h3 className="text-xl font-bold">キャンバスを開く</h3>
+          <div className="bg-surface-container-lowest p-8 rounded-2xl border border-outline-variant/10 whisper-shadow group-hover:border-primary/30 transition-all hover:-translate-y-1 h-full flex flex-col">
+            <div className="flex items-center gap-3 mb-5 text-primary">
+              <div className="p-3 bg-primary/10 rounded-xl">
+                <Network size={26} />
+              </div>
+              <h3 className="text-2xl font-bold font-sans text-on-surface">キャンバス</h3>
             </div>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              記録した悩みを自由空間に配置し、線で繋ぎ合わせてテーマに昇華します。<br/>
-              noteのメインテーマと関連トピックを視覚的に整理しましょう。
+            <p className="text-on-surface-variant/90 text-sm leading-relaxed font-serif">
+              記録した悩みを自由空間に配置し、線で繋ぎ合わせてテーマに昇華します。視覚的に整理しましょう。
             </p>
           </div>
         </Link>

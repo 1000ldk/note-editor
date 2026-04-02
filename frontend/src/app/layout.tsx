@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
+import { Sidebar } from "@/components/Sidebar";
 
 const notoSansJP = Noto_Sans_JP({ subsets: ["latin"] });
 
@@ -17,17 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className={`${notoSansJP.className} bg-gray-50 text-gray-800 antialiased min-h-screen`}>
+      <body className={`${notoSansJP.className} bg-surface text-on-surface antialiased min-h-screen selection:bg-primary/10 flex`}>
         <Providers>
-          <header className="bg-white border-b border-gray-200">
-            <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-              <h1 className="text-xl font-bold tracking-tight text-gray-900">NoteIdeaMapper</h1>
-              <nav className="flex gap-4">
-                {/* ログインボタン等は後ほど実装 */}
-              </nav>
-            </div>
-          </header>
-          <main className="max-w-5xl mx-auto px-4 py-8">
+          <Sidebar />
+          <main className="flex-1 overflow-y-auto relative w-full h-[100dvh]">
             {children}
           </main>
         </Providers>
