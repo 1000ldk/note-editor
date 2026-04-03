@@ -47,12 +47,20 @@ export default function Home() {
           日々の悩みをメモし、AIを使った重複判定で整理。{`\n`}
           自由空間でアイデアをつなぎ合わせて、{`\n`}あなただけのnote記事の種を作りましょう。
         </p>
-        <button
-          onClick={() => signIn()}
-          className="bg-primary hover:bg-primary-container text-white font-bold py-4 px-10 rounded-full transition-colors shadow-lg active:scale-95"
-        >
-          ログインして始める
-        </button>
+        <div className="flex gap-4">
+          <Link
+            href="/login"
+            className="bg-primary hover:bg-primary-container text-white font-bold py-4 px-10 rounded-full transition-colors shadow-lg active:scale-95"
+          >
+            ログインして始める
+          </Link>
+          <Link
+            href="/register"
+            className="bg-surface-container hover:bg-surface-container-high text-primary font-bold py-4 px-10 rounded-full transition-colors shadow-sm active:scale-95 border border-primary/20"
+          >
+            新規登録
+          </Link>
+        </div>
       </div>
     );
   }
@@ -78,6 +86,7 @@ export default function Home() {
           </div>
         </div>
         <button
+          id="logout-btn"
           onClick={() => signOut()}
           className="mt-4 md:mt-0 px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
         >

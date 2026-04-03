@@ -41,6 +41,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  password      String?
   plan          String    @default("FREE")
   points        Int       @default(0)
   rank          String    @default("ブロンズ")
