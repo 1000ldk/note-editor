@@ -42,6 +42,8 @@ model User {
   emailVerified DateTime?
   image         String?
   plan          String    @default("FREE")
+  points        Int       @default(0)
+  rank          String    @default("ブロンズ")
   accounts      Account[]
   sessions      Session[]
   topics        Topic[]

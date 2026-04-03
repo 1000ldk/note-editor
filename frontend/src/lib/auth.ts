@@ -31,7 +31,13 @@ export const authOptions: NextAuthOptions = {
           
           if (!user) {
             user = await prisma.user.create({
-              data: { email, name: "Test User", plan: "FREE" },
+              data: { 
+                email, 
+                name: "Test User", 
+                plan: "FREE",
+                points: 0,
+                rank: "ブロンズ"
+              },
             });
           }
           return user;
@@ -52,6 +58,10 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     }
+  },
+  pages: {
+    signIn: '/',
+    error: '/api/auth/error', // Error code passed in query string as ?error=
   },
   debug: true
 }

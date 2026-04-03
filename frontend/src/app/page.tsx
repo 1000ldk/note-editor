@@ -7,24 +7,32 @@ import { useEffect, useState } from "react";
 
 export default function Home() {
   const { data: session, status } = useSession();
-  const [plan, setPlan] = useState<string>("FREE");
+  const [userData, setUserData] = useState<{ plan: string; points: number; rank: string }>({
+    plan: "FREE",
+    points: 0,
+    rank: "ブロンズ",
+  });
 
   useEffect(() => {
     if (session) {
       fetch("/api/user/plan")
         .then((res) => res.json())
-        .then((data) => setPlan(data.plan));
+        .then((data) => {
+          if (data && !data.error) {
+            setUserData(data);
+          }
+        });
     }
   }, [session]);
 
   const togglePlan = async () => {
-    const newPlan = plan === "FREE" ? "PREMIUM" : "FREE";
+    const newPlan = userData.plan === "FREE" ? "PREMIUM" : "FREE";
     await fetch("/api/user/plan", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ plan: newPlan }),
     });
-    setPlan(newPlan);
+    setUserData(prev => ({ ...prev, plan: newPlan }));
   };
 
   if (status === "loading") {
@@ -51,19 +59,27 @@ export default function Home() {
 
   return (
     <div className="max-w-5xl mx-auto px-10 py-12 space-y-12 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-outline-variant/10 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 pb-6">
         <div>
-          <h2 className="text-3xl font-extrabold text-on-surface font-sans">こんにちは、{session.user?.name || "ユーザー"}さん</h2>
-          <p className="text-sm text-on-surface-variant/80 mt-2 font-medium">
-            現在のプラン: <span className="font-bold text-primary">{plan}</span>
-            <button onClick={togglePlan} className="ml-4 text-xs underline text-on-surface-variant/50 hover:text-on-surface-variant">
-              (テスト用プラン切替)
+          <h2 className="text-3xl font-extrabold text-gray-800 font-sans">こんにちは、{session.user?.name || "ユーザー"}さん</h2>
+          <div className="flex items-center gap-4 mt-3">
+            <p className="text-sm text-gray-600 font-medium bg-gray-100 px-3 py-1 rounded-full">
+              プラン: <span className="font-bold text-emerald-600">{userData.plan}</span>
+            </p>
+            <p className="text-sm font-bold text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200">
+              ランク: {userData.rank}
+            </p>
+            <p className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200 flex items-center">
+              ⭐ {userData.points} pt
+            </p>
+            <button onClick={togglePlan} className="text-xs underline text-gray-400 hover:text-gray-600">
+              (プラン切替テスト)
             </button>
-          </p>
+          </div>
         </div>
         <button
           onClick={() => signOut()}
-          className="mt-4 md:mt-0 text-sm font-semibold text-on-surface-variant/70 hover:text-on-surface transition-colors"
+          className="mt-4 md:mt-0 px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
         >
           ログアウト
         </button>
