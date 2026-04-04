@@ -24,13 +24,13 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user || !user.password) {
-          throw new Error("User not found");
+          throw new Error("Invalid credentials");
         }
 
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isPasswordValid) {
-          throw new Error("Invalid password");
+          throw new Error("Invalid credentials");
         }
 
         return user;
@@ -43,7 +43,6 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, token }) {
       if (token.sub && session.user) {
-        // @ts-ignore
         session.user.id = token.sub;
       }
       return session;
@@ -54,4 +53,4 @@ export const authOptions: NextAuthOptions = {
     error: '/api/auth/error', 
   },
   debug: true
-}
+  debug: process.env.NODE_ENV === "development"

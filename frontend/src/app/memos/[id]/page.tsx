@@ -48,11 +48,15 @@ export default function MemoEditor() {
     console.log('Publishing draft:', draft);
     
     try {
-      await fetch('/api/user/plan', {
+      const res = await fetch('/api/user/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'complete_memo' })
       });
+      
+      if (!res.ok) {
+        throw new Error('Failed to complete memo');
+      }
       alert('メモを完了し、10ポイントを獲得しました！');
       window.location.href = '/';
     } catch (e) {
