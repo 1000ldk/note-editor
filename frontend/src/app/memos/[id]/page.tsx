@@ -5,8 +5,9 @@ import { TopNav } from '@/components/TopNav';
 import { FloatingToolbar } from '@/components/FloatingToolbar';
 import { StatusBar } from '@/components/StatusBar';
 import { Draft } from '@/types';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useParams } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
 
 export default function MemoEditor() {
   const params = useParams();
@@ -21,6 +22,7 @@ export default function MemoEditor() {
   };
 
   const [draft, setDraft] = useState<Draft>(INITIAL_DRAFT);
+  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newTitle = e.target.value;
@@ -86,6 +88,30 @@ export default function MemoEditor() {
       />
 
       <div className="flex-1 overflow-y-auto px-6 py-12 flex flex-col items-center bg-gray-50/50">
+        <div className="w-full max-w-[740px] mb-4 flex gap-2">
+          <button
+            onClick={() => setActiveTab('edit')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'edit'
+                ? 'bg-emerald-100 text-emerald-800'
+                : 'text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            編集
+          </button>
+          <button
+            onClick={() => setActiveTab('preview')}
+            data-testid="preview-tab"
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'preview'
+                ? 'bg-emerald-100 text-emerald-800'
+                : 'text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            プレビュー
+          </button>
+        </div>
+
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -104,22 +130,33 @@ export default function MemoEditor() {
                 target.style.height = 'auto';
                 target.style.height = `${target.scrollHeight}px`;
               }}
+              readOnly={activeTab === 'preview'}
             />
             
             <div className="w-12 h-1 bg-emerald-500/30 rounded-full"></div>
             
-            <textarea
-              id="memo-content-textarea"
-              value={draft.content}
-              onChange={handleContentChange}
-              placeholder="ここに入力..."
-              className="w-full border-none focus:ring-0 focus:outline-none font-sans text-lg md:text-xl text-gray-800 placeholder:text-gray-300 resize-none min-h-[500px] leading-relaxed bg-transparent"
-            />
+            {activeTab === 'edit' ? (
+              <textarea
+                id="memo-content-textarea"
+                value={draft.content}
+                onChange={handleContentChange}
+                placeholder="ここに入力..."
+                className="w-full border-none focus:ring-0 focus:outline-none font-sans text-lg md:text-xl text-gray-800 placeholder:text-gray-300 resize-none min-h-[500px] leading-relaxed bg-transparent"
+              />
+            ) : (
+              <div
+                className="prose prose-emerald prose-lg max-w-none min-h-[500px]"
+                data-testid="preview-content"
+              >
+                <ReactMarkdown>{draft.content || '*プレビューする内容がありません*'}</ReactMarkdown>
+              </div>
+            )}
           </article>
         </motion.div>
       </div>
 
-      <FloatingToolbar onAction={(action) => {
+      {activeTab === 'edit' && (
+        <FloatingToolbar onAction={(action) => {
         const textarea = document.getElementById('memo-content-textarea') as HTMLTextAreaElement;
         if (!textarea) return;
 
@@ -127,7 +164,7 @@ export default function MemoEditor() {
         const end = textarea.selectionEnd;
         const text = draft.content;
         let newContent = text;
-        let selectedText = text.substring(start, end);
+        const selectedText = text.substring(start, end);
 
         switch (action) {
           case 'bold': newContent = text.substring(0, start) + `**${selectedText || '太字'}**` + text.substring(end); break;
@@ -146,6 +183,7 @@ export default function MemoEditor() {
           textarea.focus();
         }, 0);
       }} />
+      )}
       <StatusBar wordCount={draft.wordCount} lastSaved={draft.lastSaved} />
     </>
   );
