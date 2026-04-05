@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 const password = 'Password123!';
 
-async function registerAndLogin(page: any, email: string) {
+async function registerAndLogin(page: Page, email: string) {
   await page.goto('/register');
   await page.getByPlaceholder('note-editor user').fill('Memo Test User');
   await page.getByPlaceholder('test@example.com').fill(email);
@@ -11,16 +11,20 @@ async function registerAndLogin(page: any, email: string) {
   await expect(page).toHaveURL('/');
 }
 
-async function clickPublishAndGetAlertMessage(page: any): Promise<string> {
-  let capturedMessage = '';
-  page.once('dialog', async (dialog: any) => {
-    capturedMessage = dialog.message();
-    await dialog.accept();
+/**
+ * Clicks the "完了する" publish button and returns the message from the resulting alert dialog.
+ * The dialog is accepted immediately so the page is not blocked.
+ */
+async function clickPublishAndGetAlertMessage(page: Page): Promise<string> {
+  const dialogMessage = await new Promise<string>((resolve) => {
+    page.once('dialog', async (dialog) => {
+      resolve(dialog.message());
+      await dialog.accept();
+    });
+    // Fire-and-forget: we wait for the dialog event above, not for the click to settle
+    page.locator('button:has-text("完了する")').click();
   });
-  await page.locator('button:has-text("完了する")').click();
-  // Wait briefly for the dialog handler to fire
-  await page.waitForTimeout(500);
-  return capturedMessage;
+  return dialogMessage;
 }
 
 test.describe('Memo Completion Error Handling', () => {
@@ -28,9 +32,12 @@ test.describe('Memo Completion Error Handling', () => {
   test('shows error alert when memo completion API returns server error', async ({ page }) => {
     await registerAndLogin(page, `memo-500-${Date.now()}@example.com`);
 
+    // The memo editor page is purely client-side with local state;
+    // it does not fetch from the DB by ID, so any numeric ID works.
     await page.goto('/memos/1');
 
-    // Mock /api/user/plan POST to return 500 - set up after page load
+    // Mock /api/user/plan POST to return 500 after page load to avoid
+    // interfering with other GET requests the page may issue on mount.
     await page.route('/api/user/plan', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({ status: 500, body: JSON.stringify({ message: 'Internal Server Error' }) });
@@ -46,9 +53,12 @@ test.describe('Memo Completion Error Handling', () => {
   test('shows error alert when memo completion API returns service unavailable', async ({ page }) => {
     await registerAndLogin(page, `memo-503-${Date.now()}@example.com`);
 
+    // The memo editor page is purely client-side with local state;
+    // it does not fetch from the DB by ID, so any numeric ID works.
     await page.goto('/memos/1');
 
-    // Mock /api/user/plan POST to return 503 - set up after page load
+    // Mock /api/user/plan POST to return 503 after page load to avoid
+    // interfering with other GET requests the page may issue on mount.
     await page.route('/api/user/plan', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({ status: 503, body: JSON.stringify({ message: 'Service Unavailable' }) });
