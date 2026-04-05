@@ -4,6 +4,7 @@ const password = 'Password123!';
 
 async function registerAndLogin(page: Page, email: string) {
   await page.goto('/register');
+  // Placeholder matches frontend/src/app/register/page.tsx line 71
   await page.getByPlaceholder('note-editor user').fill('Memo Test User');
   await page.getByPlaceholder('test@example.com').fill(email);
   await page.getByPlaceholder('********').fill(password);
@@ -14,6 +15,12 @@ async function registerAndLogin(page: Page, email: string) {
 /**
  * Clicks the "完了する" publish button and returns the message from the resulting alert dialog.
  * The dialog is accepted immediately so the page is not blocked.
+ *
+ * Note: `.click()` is intentionally not awaited here. The outer Promise resolves only after
+ * the 'dialog' event fires (which happens as a direct result of the click), so we never
+ * advance past `await new Promise(...)` until the dialog has appeared and been handled.
+ * Awaiting the click separately would cause a deadlock: `.click()` in Next.js sometimes
+ * waits for navigation to settle, which cannot happen while a dialog is blocking the page.
  */
 async function clickPublishAndGetAlertMessage(page: Page): Promise<string> {
   const dialogMessage = await new Promise<string>((resolve) => {
@@ -21,8 +28,7 @@ async function clickPublishAndGetAlertMessage(page: Page): Promise<string> {
       resolve(dialog.message());
       await dialog.accept();
     });
-    // Fire-and-forget: we wait for the dialog event above, not for the click to settle
-    page.locator('button:has-text("完了する")').click();
+    void page.locator('button:has-text("完了する")').click();
   });
   return dialogMessage;
 }
