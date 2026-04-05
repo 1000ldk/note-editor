@@ -38,9 +38,8 @@ test.describe('Memo Completion Error Handling', () => {
   test('shows error alert when memo completion API returns server error', async ({ page }) => {
     await registerAndLogin(page, `memo-500-${Date.now()}@example.com`);
 
-    // The memo editor page is purely client-side with local state;
-    // it does not fetch from the DB by ID, so any numeric ID works.
-    await page.goto('/memos/1');
+    // We go to /memos/new to create a new draft
+    await page.goto('/memos/new');
 
     // Mock /api/user/plan POST to return 500 after page load to avoid
     // interfering with other GET requests the page may issue on mount.
@@ -59,9 +58,8 @@ test.describe('Memo Completion Error Handling', () => {
   test('shows error alert when memo completion API returns service unavailable', async ({ page }) => {
     await registerAndLogin(page, `memo-503-${Date.now()}@example.com`);
 
-    // The memo editor page is purely client-side with local state;
-    // it does not fetch from the DB by ID, so any numeric ID works.
-    await page.goto('/memos/1');
+    // We go to /memos/new to create a new draft
+    await page.goto('/memos/new');
 
     // Mock /api/user/plan POST to return 503 after page load to avoid
     // interfering with other GET requests the page may issue on mount.

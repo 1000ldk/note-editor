@@ -17,7 +17,7 @@ test.describe('Memo Editor Preview Tab', () => {
     await registerAndLogin(page, `memo-preview-${Date.now()}@example.com`);
 
     // Go directly to a new memo editor page
-    await page.goto('/memos/1');
+    await page.goto('/memos/new');
 
     // Make sure we are in edit mode initially
     await expect(page.locator('button:has-text("編集")')).toBeVisible();

@@ -12,9 +12,10 @@ import ReactMarkdown from 'react-markdown';
 export default function MemoEditor() {
   const params = useParams();
   const memoId = params?.id as string | undefined;
+  const isNew = memoId === 'new';
 
   const INITIAL_DRAFT: Draft = {
-    id: memoId || '1',
+    id: isNew ? '' : (memoId || '1'),
     title: '',
     content: '',
     lastSaved: new Date(),
@@ -23,6 +24,38 @@ export default function MemoEditor() {
 
   const [draft, setDraft] = useState<Draft>(INITIAL_DRAFT);
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
+  const [loading, setLoading] = useState(!isNew);
+
+  useEffect(() => {
+    if (isNew) {
+      setLoading(false);
+      return;
+    }
+
+    async function fetchMemo() {
+      try {
+        const res = await fetch(`/api/memos/${memoId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setDraft({
+            id: data.id,
+            title: data.title,
+            content: data.content,
+            lastSaved: new Date(data.updatedAt),
+            wordCount: data.content ? data.content.replace(/\s+/g, '').length : 0,
+          });
+        } else {
+          console.error('Failed to load memo', res.status);
+          alert('メモの読み込みに失敗しました。');
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchMemo();
+  }, [memoId, isNew]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newTitle = e.target.value;
@@ -40,16 +73,59 @@ export default function MemoEditor() {
     }));
   };
 
-  const handleSave = useCallback(() => {
-    setDraft(prev => ({ ...prev, lastSaved: new Date() }));
-    console.log('Draft saved:', draft);
-    alert('保存しました！');
+  const handleSave = useCallback(async () => {
+    try {
+      const isCreating = !draft.id || draft.id === 'new';
+      const res = await fetch(isCreating ? '/api/memos' : `/api/memos/${draft.id}`, {
+        method: isCreating ? 'POST' : 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: draft.title,
+          content: draft.content,
+          status: 'DRAFT',
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setDraft(prev => ({ 
+          ...prev, 
+          id: data.id, 
+          lastSaved: new Date(data.updatedAt) 
+        }));
+        if (isCreating) {
+          window.history.replaceState(null, '', `/memos/${data.id}`);
+        }
+        alert('保存しました！');
+      } else {
+        alert('保存に失敗しました。');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('保存中にエラーが発生しました。');
+    }
   }, [draft]);
 
   const handlePublish = async () => {
-    console.log('Publishing draft:', draft);
-    
     try {
+      // 1. Save as PUBLISHED
+      const isCreating = !draft.id || draft.id === 'new';
+      const resMemo = await fetch(isCreating ? '/api/memos' : `/api/memos/${draft.id}`, {
+        method: isCreating ? 'POST' : 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: draft.title,
+          content: draft.content,
+          status: 'PUBLISHED',
+        })
+      });
+
+      if (!resMemo.ok) {
+        alert('メモの公開に失敗しました。');
+        return;
+      }
+
+      // 2. Call gamification endpoint
       const res = await fetch('/api/user/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -58,15 +134,15 @@ export default function MemoEditor() {
       
       if (!res.ok) {
         console.error('Failed to complete memo:', res.status, res.statusText);
-        alert('メモの完了に失敗しました。時間をおいて再度お試しください。');
+        alert('メモは公開されましたが、ポイントの獲得に失敗しました。');
+        window.location.href = '/memos';
         return;
       }
-      alert('メモを完了し、10ポイントを獲得しました！');
-      window.location.href = '/';
+      alert('メモを公開し、10ポイントを獲得しました！');
+      window.location.href = '/memos';
     } catch (e) {
       console.error(e);
-      alert('メモの完了に失敗しました。通信状況を確認して再度お試しください。');
-      return;
+      alert('通信状況を確認して再度お試しください。');
     }
   };
 
@@ -76,7 +152,15 @@ export default function MemoEditor() {
     if (textarea) {
       textarea.style.paddingBottom = '200px'; 
     }
-  }, []);
+  }, [activeTab]);
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-gray-50/50">
+        <div className="animate-spin h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <>
