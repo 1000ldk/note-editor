@@ -55,14 +55,15 @@ export default function MemoEditor() {
       });
       
       if (!res.ok) {
-        throw new Error('Failed to complete memo');
+        console.error('Failed to complete memo:', res.status, res.statusText);
+        alert('メモの完了に失敗しました。時間をおいて再度お試しください。');
+        return;
       }
       alert('メモを完了し、10ポイントを獲得しました！');
       window.location.href = '/';
     } catch (e) {
       console.error(e);
-      alert('保存しました！');
-      window.location.href = '/';
+      alert('メモの完了に失敗しました。通信状況を確認して再度お試しください。');
     }
   };
 
