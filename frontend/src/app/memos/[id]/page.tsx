@@ -64,6 +64,7 @@ export default function MemoEditor() {
     } catch (e) {
       console.error(e);
       alert('メモの完了に失敗しました。通信状況を確認して再度お試しください。');
+      return;
     }
   };
 
