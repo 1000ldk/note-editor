@@ -41,12 +41,40 @@ export default function MemoEditor() {
   const handleSave = useCallback(() => {
     setDraft(prev => ({ ...prev, lastSaved: new Date() }));
     console.log('Draft saved:', draft);
+    alert('保存しました！');
   }, [draft]);
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     console.log('Publishing draft:', draft);
-    alert('Memo Published!');
+    
+    try {
+      const res = await fetch('/api/user/plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'complete_memo' })
+      });
+      
+      if (!res.ok) {
+        console.error('Failed to complete memo:', res.status, res.statusText);
+        alert('メモの完了に失敗しました。時間をおいて再度お試しください。');
+        return;
+      }
+      alert('メモを完了し、10ポイントを獲得しました！');
+      window.location.href = '/';
+    } catch (e) {
+      console.error(e);
+      alert('メモの完了に失敗しました。通信状況を確認して再度お試しください。');
+      return;
+    }
   };
+
+  useEffect(() => {
+    // Add auto-scroll helper when typing heavily, so user always sees bottom of textarea clearly
+    const textarea = document.getElementById('memo-content-textarea');
+    if (textarea) {
+      textarea.style.paddingBottom = '200px'; 
+    }
+  }, []);
 
   return (
     <>
@@ -54,21 +82,22 @@ export default function MemoEditor() {
         title={draft.title} 
         onSave={handleSave} 
         onPublish={handlePublish} 
+        showBack={true}
       />
 
-      <div className="flex-1 overflow-y-auto px-6 py-24 flex flex-col items-center">
+      <div className="flex-1 overflow-y-auto px-6 py-12 flex flex-col items-center bg-gray-50/50">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-[740px] bg-surface-container-lowest p-12 md:p-20 rounded-xl whisper-shadow"
+          className="w-full max-w-[740px] bg-white p-8 md:p-12 rounded-xl shadow-sm border border-gray-200"
         >
-          <article className="space-y-8">
+          <article className="space-y-6">
             <textarea
               value={draft.title}
               onChange={handleTitleChange}
-              placeholder="Title..."
+              placeholder="タイトルを入力..."
               rows={1}
-              className="w-full bg-transparent border-none focus:ring-0 font-sans font-extrabold text-5xl md:text-6xl text-on-surface placeholder:text-outline-variant/40 resize-none h-auto overflow-hidden leading-tight"
+              className="w-full border-none focus:ring-0 focus:outline-none font-sans font-extrabold text-4xl md:text-5xl text-gray-800 placeholder:text-gray-300 resize-none h-auto overflow-hidden leading-tight bg-transparent"
               style={{ height: 'auto' }}
               onInput={(e) => {
                 const target = e.target as HTMLTextAreaElement;
@@ -77,19 +106,46 @@ export default function MemoEditor() {
               }}
             />
             
-            <div className="w-16 h-1 bg-primary/20 rounded-full"></div>
+            <div className="w-12 h-1 bg-emerald-500/30 rounded-full"></div>
             
             <textarea
+              id="memo-content-textarea"
               value={draft.content}
               onChange={handleContentChange}
-              placeholder="Tell your story..."
-              className="w-full bg-transparent border-none focus:ring-0 font-serif text-xl md:text-2xl text-on-surface-variant placeholder:text-outline-variant/40 resize-none min-h-[500px] leading-[1.8]"
+              placeholder="ここに入力..."
+              className="w-full border-none focus:ring-0 focus:outline-none font-sans text-lg md:text-xl text-gray-800 placeholder:text-gray-300 resize-none min-h-[500px] leading-relaxed bg-transparent"
             />
           </article>
         </motion.div>
       </div>
 
-      <FloatingToolbar />
+      <FloatingToolbar onAction={(action) => {
+        const textarea = document.getElementById('memo-content-textarea') as HTMLTextAreaElement;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = draft.content;
+        let newContent = text;
+        let selectedText = text.substring(start, end);
+
+        switch (action) {
+          case 'bold': newContent = text.substring(0, start) + `**${selectedText || '太字'}**` + text.substring(end); break;
+          case 'italic': newContent = text.substring(0, start) + `*${selectedText || '斜体'}*` + text.substring(end); break;
+          case 'h1': newContent = text.substring(0, start) + `\n# ${selectedText || '見出し1'}\n` + text.substring(end); break;
+          case 'h2': newContent = text.substring(0, start) + `\n## ${selectedText || '見出し2'}\n` + text.substring(end); break;
+          case 'quote': newContent = text.substring(0, start) + `\n> ${selectedText || '引用'}\n` + text.substring(end); break;
+          case 'code': newContent = text.substring(0, start) + `\n\`\`\`\n${selectedText || 'コード'}\n\`\`\`\n` + text.substring(end); break;
+          case 'image': newContent = text.substring(0, start) + `![代替テキスト](url)` + text.substring(end); break;
+        }
+
+        setDraft(prev => ({ ...prev, content: newContent }));
+        
+        // Return focus to textarea
+        setTimeout(() => {
+          textarea.focus();
+        }, 0);
+      }} />
       <StatusBar wordCount={draft.wordCount} lastSaved={draft.lastSaved} />
     </>
   );

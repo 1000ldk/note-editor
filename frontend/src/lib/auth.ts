@@ -2,43 +2,38 @@
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "./prisma"
+import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
   // @ts-ignore
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
-      name: "開発用ログイン",
+      name: "ログイン",
       credentials: {
         email: { label: "Email", type: "email", placeholder: "test@example.com" },
-        password: { label: "Password", type: "password", placeholder: "password123" },
+        password: { label: "Password", type: "password", placeholder: "********" },
       },
       async authorize(credentials) {
-        const email = credentials?.email;
-        const password = credentials?.password;
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
         
-        console.log('Authorize called with email:', email);
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        });
 
-        if (email !== "test@example.com" || password !== "password123") {
-          console.warn("Invalid test credentials");
+        if (!user || !user.password) {
           return null;
         }
 
-        try {
-          let user = await prisma.user.findUnique({
-            where: { email },
-          });
-          
-          if (!user) {
-            user = await prisma.user.create({
-              data: { email, name: "Test User", plan: "FREE" },
-            });
-          }
-          return user;
-        } catch (error) {
-          console.error('Error during authorize:', error);
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+
+        if (!isPasswordValid) {
           return null;
         }
+
+        return user;
       }
     })
   ],
@@ -53,5 +48,9 @@ export const authOptions: NextAuthOptions = {
       return session;
     }
   },
-  debug: true
-}
+  pages: {
+    signIn: '/login',
+    error: '/api/auth/error', 
+  },
+  debug: process.env.NODE_ENV === "development",
+};
