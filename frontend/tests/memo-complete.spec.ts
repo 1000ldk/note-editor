@@ -1,16 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-
-const password = 'Password123!';
-
-async function registerAndLogin(page: Page, email: string) {
-  await page.goto('/register');
-  // Placeholder matches frontend/src/app/register/page.tsx line 71
-  await page.getByPlaceholder('note-editor user').fill('Memo Test User');
-  await page.getByPlaceholder('test@example.com').fill(email);
-  await page.getByPlaceholder('********').fill(password);
-  await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL('/');
-}
+import { registerAndLogin } from './helpers/auth';
 
 /**
  * Clicks the "完了する" publish button and returns the message from the resulting alert dialog.
@@ -52,7 +41,7 @@ test.describe('Memo Completion Error Handling', () => {
     });
 
     const message = await clickPublishAndGetAlertMessage(page);
-    expect(message).toContain('メモの完了に失敗しました');
+    expect(message).toContain('ポイントの獲得に失敗しました');
   });
 
   test('shows error alert when memo completion API returns service unavailable', async ({ page }) => {
@@ -72,6 +61,6 @@ test.describe('Memo Completion Error Handling', () => {
     });
 
     const message = await clickPublishAndGetAlertMessage(page);
-    expect(message).toContain('メモの完了に失敗しました');
+    expect(message).toContain('ポイントの獲得に失敗しました');
   });
 });

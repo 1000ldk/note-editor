@@ -75,7 +75,7 @@ export default function MemoEditor() {
 
   const handleSave = useCallback(async () => {
     try {
-      const isCreating = !draft.id || draft.id === 'new';
+      const isCreating = !draft.id;
       const res = await fetch(isCreating ? '/api/memos' : `/api/memos/${draft.id}`, {
         method: isCreating ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -109,7 +109,7 @@ export default function MemoEditor() {
   const handlePublish = async () => {
     try {
       // 1. Save as PUBLISHED
-      const isCreating = !draft.id || draft.id === 'new';
+      const isCreating = !draft.id;
       const resMemo = await fetch(isCreating ? '/api/memos' : `/api/memos/${draft.id}`, {
         method: isCreating ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },

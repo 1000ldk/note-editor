@@ -17,9 +17,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         id: id,
         userId: session.user.id
       },
-      include: {
-        topic: true
-      }
     });
 
     if (!memo) {
@@ -55,6 +52,17 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const { title, content, status, topicId } = await request.json();
+
+    const ALLOWED_STATUSES = ['DRAFT', 'PUBLISHED'];
+    if (status !== undefined && !ALLOWED_STATUSES.includes(status)) {
+      return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
+    }
+    if (title !== undefined && typeof title !== 'string') {
+      return NextResponse.json({ error: 'Invalid title' }, { status: 400 });
+    }
+    if (content !== undefined && typeof content !== 'string') {
+      return NextResponse.json({ error: 'Invalid content' }, { status: 400 });
+    }
 
     const updatedMemo = await prisma.memo.update({
       where: { id: id },

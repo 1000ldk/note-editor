@@ -87,7 +87,7 @@ export default function MemosList() {
                     {memo.title}
                   </h2>
                   <p className="text-on-surface-variant font-serif line-clamp-3 text-sm">
-                    {memo.content.substring(0, 100) || "タイトルなし"}
+                    {memo.content.substring(0, 100) || "内容なし"}
                   </p>
                 </Link>
               </motion.div>

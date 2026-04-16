@@ -1,15 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
-
-const password = 'Password123!';
-
-async function registerAndLogin(page: Page, email: string) {
-  await page.goto('/register');
-  await page.getByPlaceholder('note-editor user').fill('Memo Test User');
-  await page.getByPlaceholder('test@example.com').fill(email);
-  await page.getByPlaceholder('********').fill(password);
-  await page.locator('button[type="submit"]').click();
-  await expect(page).toHaveURL('/');
-}
+import { test, expect } from '@playwright/test';
+import { registerAndLogin } from './helpers/auth';
 
 test.describe('Memo Editor Preview Tab', () => {
   test('should render markdown content in the preview tab', async ({ page }) => {
