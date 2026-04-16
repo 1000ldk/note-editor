@@ -25,14 +25,8 @@ export default function Home() {
     }
   }, [session]);
 
-  const togglePlan = async () => {
-    const newPlan = userData.plan === "FREE" ? "PREMIUM" : "FREE";
-    await fetch("/api/user/plan", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plan: newPlan }),
-    });
-    setUserData(prev => ({ ...prev, plan: newPlan }));
+  const togglePlan = () => {
+    alert("今後使用できるようになります");
   };
 
   if (status === "loading") {
