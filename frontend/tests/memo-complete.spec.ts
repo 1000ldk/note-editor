@@ -1,25 +1,11 @@
 import { test, expect, type Page } from '@playwright/test';
-import { registerAndLogin } from './helpers/auth';
+import { registerAndLogin, clickButtonAndGetAlertMessage } from './helpers/auth';
 
 /**
  * Clicks the "完了する" publish button and returns the message from the resulting alert dialog.
- * The dialog is accepted immediately so the page is not blocked.
- *
- * Note: `.click()` is intentionally not awaited here. The outer Promise resolves only after
- * the 'dialog' event fires (which happens as a direct result of the click), so we never
- * advance past `await new Promise(...)` until the dialog has appeared and been handled.
- * Awaiting the click separately would cause a deadlock: `.click()` in Next.js sometimes
- * waits for navigation to settle, which cannot happen while a dialog is blocking the page.
  */
 async function clickPublishAndGetAlertMessage(page: Page): Promise<string> {
-  const dialogMessage = await new Promise<string>((resolve) => {
-    page.once('dialog', async (dialog) => {
-      resolve(dialog.message());
-      await dialog.accept();
-    });
-    void page.locator('button:has-text("完了する")').click();
-  });
-  return dialogMessage;
+  return clickButtonAndGetAlertMessage(page, '完了する');
 }
 
 test.describe('Memo Completion Error Handling', () => {

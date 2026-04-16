@@ -1,19 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
-import { registerAndLogin } from './helpers/auth';
-
-/**
- * Clicks the save button and returns the message from the resulting alert dialog.
- */
-async function clickSaveAndGetAlertMessage(page: Page): Promise<string> {
-  const dialogMessage = await new Promise<string>((resolve) => {
-    page.once('dialog', async (dialog) => {
-      resolve(dialog.message());
-      await dialog.accept();
-    });
-    void page.locator('button:has-text("保存")').click();
-  });
-  return dialogMessage;
-}
+import { test, expect } from '@playwright/test';
+import { registerAndLogin, clickButtonAndGetAlertMessage } from './helpers/auth';
 
 test.describe('Memo CRUD Flow', () => {
   test('can create a new memo, save it, see it in the list, and reopen it', async ({ page }) => {
@@ -31,7 +17,7 @@ test.describe('Memo CRUD Flow', () => {
     await page.locator('textarea[placeholder="ここに入力..."]').fill(testContent);
 
     // Save the memo
-    const saveMsg = await clickSaveAndGetAlertMessage(page);
+    const saveMsg = await clickButtonAndGetAlertMessage(page, '下書き保存');
     expect(saveMsg).toContain('保存しました');
 
     // After saving, the URL should change to the actual memo ID
@@ -72,13 +58,7 @@ test.describe('Memo CRUD Flow', () => {
       }
     });
 
-    const errMsg = await new Promise<string>((resolve) => {
-      page.once('dialog', async (dialog) => {
-        resolve(dialog.message());
-        await dialog.accept();
-      });
-      void page.locator('button:has-text("保存")').click();
-    });
+    const errMsg = await clickButtonAndGetAlertMessage(page, '下書き保存');
 
     expect(errMsg).toContain('保存に失敗しました');
   });
