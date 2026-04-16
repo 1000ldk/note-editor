@@ -88,3 +88,5 @@ model Memo {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// force update for Vercel
