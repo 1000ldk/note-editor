@@ -27,6 +27,6 @@ export async function clickButtonAndGetAlertMessage(page: Page, buttonText: stri
       resolve(dialog.message());
       await dialog.accept();
     });
-    void page.locator(`button:has-text("${buttonText}")`).click();
+    void page.locator('button', { hasText: buttonText }).click();
   });
 }
