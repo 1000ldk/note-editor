@@ -18,9 +18,7 @@ export function Sidebar() {
   ];
 
   const handleNewEntry = () => {
-    // Generate a simple ID or navigate to a new memo page
-    const newId = Date.now().toString();
-    router.push(`/memos/${newId}`);
+    router.push('/memos/new');
   };
 
   return (

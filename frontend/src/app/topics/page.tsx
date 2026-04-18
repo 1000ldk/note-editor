@@ -15,7 +15,13 @@ export default function TopicsPage() {
 
   useEffect(() => {
     fetchTopics();
-    fetch("/api/user/plan").then((r) => r.json()).then((d) => setPlan(d.plan));
+    fetch("/api/user/plan")
+      .then((r) => {
+        if (!r.ok) throw new Error(`Failed to fetch plan: ${r.status}`);
+        return r.json();
+      })
+      .then((d) => setPlan(d.plan))
+      .catch((err) => console.error("[TopicsPage] Failed to load user plan:", err));
   }, []);
 
   const fetchTopics = async () => {

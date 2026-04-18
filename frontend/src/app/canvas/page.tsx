@@ -24,7 +24,10 @@ export default function CanvasPage() {
 
   useEffect(() => {
     fetch("/api/topics")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to fetch topics: ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
         setTopics(data);
         
@@ -48,6 +51,9 @@ export default function CanvasPage() {
             className: "custom-edge",
           }));
         setEdges(loadedEdges);
+      })
+      .catch((err) => {
+        console.error("[CanvasPage] Failed to load topics:", err);
       });
   }, [setNodes, setEdges]);
 
