@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { title, positionX, positionY, parentId } = body;
+    const { title, positionX, positionY, parentId, categoryName, color } = body;
 
     if (!title) {
       return new NextResponse("Title is required", { status: 400 });
@@ -43,6 +43,8 @@ export async function POST(req: Request) {
         positionX: positionX || 0,
         positionY: positionY || 0,
         parentId: parentId || null,
+        categoryName: categoryName || null,
+        color: color || null,
       },
     });
 

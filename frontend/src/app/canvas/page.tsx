@@ -32,8 +32,23 @@ export default function CanvasPage() {
         const loadedNodes: Node[] = data.map((t: any) => ({
           id: t.id,
           position: { x: t.positionX || Math.random() * 200, y: t.positionY || Math.random() * 200 },
-          data: { label: t.title },
-          className: "bg-white border-2 border-gray-200 rounded-lg p-3 shadow-sm min-w-[150px] max-w-[250px] text-sm break-words",
+          data: { 
+            label: (
+              <div className="flex flex-col items-start gap-1">
+                {t.categoryName && (
+                  <span 
+                    className="text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90" 
+                    style={{ backgroundColor: t.color || '#e5e7eb', color: '#fff', textShadow: '0 0 2px rgba(0,0,0,0.5)' }}
+                  >
+                    {t.categoryName}
+                  </span>
+                )}
+                <span>{t.title}</span>
+              </div>
+            ) 
+          },
+          className: "bg-white border-2 rounded-lg p-3 shadow-sm min-w-[150px] max-w-[250px] text-sm break-words",
+          style: { borderColor: t.color || "#e5e7eb" }
         }));
         setNodes(loadedNodes);
 
