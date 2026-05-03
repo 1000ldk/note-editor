@@ -17,6 +17,20 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
+/**
+ * Returns '#fff' or '#111' depending on whether the hex background color
+ * is dark or light, so that overlaid text remains readable.
+ */
+function getContrastColor(hex: string): string {
+  const cleaned = hex.replace("#", "");
+  const r = parseInt(cleaned.substring(0, 2), 16);
+  const g = parseInt(cleaned.substring(2, 4), 16);
+  const b = parseInt(cleaned.substring(4, 6), 16);
+  // Perceived luminance (ITU-R BT.601)
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance > 160 ? "#111" : "#fff";
+}
+
 export default function CanvasPage() {
   const [topics, setTopics] = useState<any[]>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -31,14 +45,14 @@ export default function CanvasPage() {
         // Transform DB topics into React Flow nodes
         const loadedNodes: Node[] = data.map((t: any) => ({
           id: t.id,
-          position: { x: t.positionX || Math.random() * 200, y: t.positionY || Math.random() * 200 },
+          position: { x: t.positionX ?? Math.random() * 200, y: t.positionY ?? Math.random() * 200 },
           data: { 
             label: (
               <div className="flex flex-col items-start gap-1">
                 {t.categoryName && (
                   <span 
                     className="text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90" 
-                    style={{ backgroundColor: t.color || '#e5e7eb', color: '#fff', textShadow: '0 0 2px rgba(0,0,0,0.5)' }}
+                    style={{ backgroundColor: t.color || '#e5e7eb', color: getContrastColor(t.color || '#e5e7eb') }}
                   >
                     {t.categoryName}
                   </span>
