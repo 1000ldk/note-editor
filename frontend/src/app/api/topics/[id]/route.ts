@@ -27,7 +27,9 @@ export async function PUT(
         ...(positionX !== undefined && { positionX }),
         ...(positionY !== undefined && { positionY }),
         ...(parentId !== undefined && { parentId: parentId === "null" ? null : parentId }), // Un-parenting support
-        ...(categoryName !== undefined && { categoryName }),
+        ...(categoryName !== undefined && {
+          categoryName: categoryName === "" ? null : categoryName,
+        }),
         ...(color !== undefined && { color }),
       },
     });
