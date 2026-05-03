@@ -31,6 +31,8 @@ function getContrastColor(hex: string): string {
   return luminance > 160 ? "#111" : "#fff";
 }
 
+const DEFAULT_NODE_COLOR = '#e5e7eb';
+
 export default function CanvasPage() {
   const [topics, setTopics] = useState<any[]>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -52,7 +54,7 @@ export default function CanvasPage() {
                 {t.categoryName && (
                   <span 
                     className="text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90" 
-                    style={{ backgroundColor: t.color || '#e5e7eb', color: getContrastColor(t.color || '#e5e7eb') }}
+                    style={{ backgroundColor: t.color || DEFAULT_NODE_COLOR, color: getContrastColor(t.color || DEFAULT_NODE_COLOR) }}
                   >
                     {t.categoryName}
                   </span>
@@ -62,7 +64,7 @@ export default function CanvasPage() {
             ) 
           },
           className: "bg-white border-2 rounded-lg p-3 shadow-sm min-w-[150px] max-w-[250px] text-sm break-words",
-          style: { borderColor: t.color || "#e5e7eb" }
+          style: { borderColor: t.color || DEFAULT_NODE_COLOR }
         }));
         setNodes(loadedNodes);
 
