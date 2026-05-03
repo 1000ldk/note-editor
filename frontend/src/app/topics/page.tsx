@@ -121,8 +121,9 @@ export default function TopicsPage() {
 
           <div className="mt-4 flex gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-bold text-gray-700 mb-1">カテゴリ名 (任意)</label>
+              <label htmlFor="category-name" className="block text-sm font-bold text-gray-700 mb-1">カテゴリ名 (任意)</label>
               <input
+                id="category-name"
                 type="text"
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
@@ -132,8 +133,9 @@ export default function TopicsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">色</label>
+              <label htmlFor="category-color" className="block text-sm font-bold text-gray-700 mb-1">色</label>
               <input
+                id="category-color"
                 type="color"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
