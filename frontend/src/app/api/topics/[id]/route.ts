@@ -15,7 +15,7 @@ export async function PUT(
 
     const { id } = await context.params;
     const body = await req.json();
-    const { title, positionX, positionY, parentId } = body;
+    const { title, positionX, positionY, parentId, categoryName, color } = body;
 
     const topic = await prisma.topic.update({
       where: {
@@ -27,6 +27,10 @@ export async function PUT(
         ...(positionX !== undefined && { positionX }),
         ...(positionY !== undefined && { positionY }),
         ...(parentId !== undefined && { parentId: parentId === "null" ? null : parentId }), // Un-parenting support
+        ...(categoryName !== undefined && {
+          categoryName: categoryName === "" ? null : categoryName,
+        }),
+        ...(color !== undefined && { color }),
       },
     });
 
