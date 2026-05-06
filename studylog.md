@@ -10,15 +10,15 @@ Next.js は「フロントエンドフレームワーク」と紹介されるこ
 
 ## 1. ファイルベースルーティング（App Router）
 
-`src/app/` のフォルダ・ファイル構造が、そのまま URL になる。
+`frontend/src/app/` のフォルダ・ファイル構造が、そのまま URL になる。
 
 | ファイル | URL |
 |---|---|
-| `src/app/page.tsx` | `/` （ダッシュボード） |
-| `src/app/memos/page.tsx` | `/memos` |
-| `src/app/memos/[id]/page.tsx` | `/memos/123` など（動的ルート） |
-| `src/app/canvas/page.tsx` | `/canvas` |
-| `src/app/topics/page.tsx` | `/topics` |
+| `frontend/src/app/page.tsx` | `/` （ダッシュボード） |
+| `frontend/src/app/memos/page.tsx` | `/memos` |
+| `frontend/src/app/memos/[id]/page.tsx` | `/memos/123` など（動的ルート） |
+| `frontend/src/app/canvas/page.tsx` | `/canvas` |
+| `frontend/src/app/topics/page.tsx` | `/topics` |
 
 ### 動的ルートとは
 `[id]` のように角括弧をフォルダ名にすると、URL の可変部分を `params.id` として受け取れる。  
@@ -28,11 +28,11 @@ Next.js は「フロントエンドフレームワーク」と紹介されるこ
 
 ## 2. Route Handlers（サーバー API）
 
-`src/app/api/**/route.ts` に `GET`, `POST`, `PUT`, `DELETE` などの関数を export すると、  
+`frontend/src/app/api/**/route.ts` に `GET`, `POST`, `PUT`, `DELETE` などの関数を export すると、  
 その関数が HTTP エンドポイントになる。いわゆるバックエンドの API 処理にあたる。
 
 ```
-src/app/api/
+frontend/src/app/api/
   memos/
     route.ts          → GET /api/memos, POST /api/memos
     [id]/route.ts     → GET/PUT/DELETE /api/memos/:id
@@ -50,7 +50,7 @@ src/app/api/
 ### 書き方の基本
 
 ```ts
-// src/app/api/memos/route.ts
+// frontend/src/app/api/memos/route.ts
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -97,11 +97,11 @@ export default function MemosPage() {
 
 ## 4. layout.tsx（共通レイアウト）
 
-`src/app/layout.tsx` はすべてのページを包む「外枠」。  
+`frontend/src/app/layout.tsx` はすべてのページを包む「外枠」。  
 サイドバーやフォント設定・メタデータなど、ページをまたいで共通なものを書く場所。
 
 ```ts
-// src/app/layout.tsx
+// frontend/src/app/layout.tsx
 export const metadata: Metadata = {
   title: "NoteIdeaMapper",
   description: "noteクリエイターのためのアイデア整理・統合ツール",
@@ -129,7 +129,7 @@ export default function RootLayout({ children }) {
 このプロジェクトでは「ログインしていないユーザーを `/login` にリダイレクト」するために使っている。
 
 ```ts
-// src/middleware.ts
+// frontend/src/middleware.ts
 import { withAuth } from "next-auth/middleware";
 
 export default withAuth({
@@ -142,7 +142,7 @@ export const config = {
 };
 ```
 
-`middleware.ts` は `src/app/` の外、`src/` 直下に置くのがルール。
+`middleware.ts` は `frontend/src/app/` の外、`frontend/src/` 直下に置くのがルール。
 
 ---
 
@@ -151,7 +151,7 @@ export const config = {
 `next-auth` は Next.js 向けの認証ライブラリ。  
 このプロジェクトでは**メール・パスワードによるログイン（CredentialsProvider）**を使っている。
 
-### 設定（src/lib/auth.ts）
+### 設定（frontend/src/lib/auth.ts）
 
 ```ts
 export const authOptions: NextAuthOptions = {
@@ -208,7 +208,7 @@ const { data: session, status } = useSession();
 Prisma は TypeScript 向けの ORM（Object Relational Mapper）。  
 SQL を直接書かずに、TypeScript のオブジェクト操作でDBを扱える。
 
-### スキーマ（prisma/schema.prisma）
+### スキーマ（frontend/prisma/schema.prisma）
 
 ```prisma
 model Memo {
@@ -217,7 +217,9 @@ model Memo {
   content   String
   status    String   @default("DRAFT")
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topicId   String?
+  topic     Topic?   @relation(fields: [topicId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -304,12 +306,12 @@ const { id } = useParams();    // [id] の動的パラメータ
 
 ### 1. 基本方針：Next.jsを「共通APIサーバー」として活用する
 サーバーをフロントエンド用とバックエンド用に物理的に別サーバーへ分割すると、インフラ管理やデプロイの手間が倍増します。
-まずは現在の **Next.js の API Routes (`src/app/api/...`) を、Webページからもモバイルアプリからも呼び出せる共通の REST API として整える（論理的な分離）** アプローチが最適です。
+まずは現在の **Next.js の API Routes (`frontend/src/app/api/...`) を、Webページからもモバイルアプリからも呼び出せる共通の REST API として整える（論理的な分離）** アプローチが最適です。
 
 ### 2. モバイル対応に向けたロードマップ
 
 #### 第1段階：ビジネスロジックの分離（リファクタリング）
-現在 `route.ts` に直接書かれているデータベース操作（Prisma）や複雑な処理を、`src/lib/services/` などの別階層（Service層）に切り出します。
+現在 `route.ts` に直接書かれているデータベース操作（Prisma）や複雑な処理を、`frontend/src/lib/services/` などの別階層（Service層）に切り出します。
 これにより、APIエンドポイントは「リクエストを受け取り、処理を委譲し、結果のJSONを返す」だけのシンプルな役割になり、再利用性と保守性が大きく向上します。
 
 #### 第2段階：モバイル向け認証APIの準備
