@@ -8,7 +8,7 @@ noteクリエイターのための、「悩みから記事の種を育てる」�
 
 以下のURLからプロトタイプ版をご利用出来ます
 
-https://note-editor-mye9vnwq8-1000ldks-projects.vercel.app/
+[https://note-editor-mye9vnwq8-1000ldks-projects.vercel.app/](https://note-editor-ptlj.vercel.app/)
 
 (初期設定でvercelにログインする必要があります。ご了承ください)
 
