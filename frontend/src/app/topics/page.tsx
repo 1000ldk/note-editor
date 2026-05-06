@@ -9,6 +9,8 @@ export default function TopicsPage() {
   const { status } = useSession();
   const [topics, setTopics] = useState<any[]>([]);
   const [title, setTitle] = useState("");
+  const [categoryName, setCategoryName] = useState("");
+  const [color, setColor] = useState("#ffffff");
   const [plan, setPlan] = useState("FREE");
   const [aiMessage, setAiMessage] = useState<{ isDuplicate: boolean; message: string; duplicateId?: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -67,10 +69,12 @@ export default function TopicsPage() {
     const res = await fetch("/api/topics", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: textToSave, parentId }),
+      body: JSON.stringify({ title: textToSave, parentId, categoryName, color }),
     });
     if (res.ok) {
       setTitle("");
+      setCategoryName("");
+      setColor("#ffffff");
       setAiMessage(null);
       fetchTopics();
     }
@@ -114,6 +118,32 @@ export default function TopicsPage() {
             rows={4}
             disabled={loading}
           />
+
+          <div className="mt-4 flex gap-4">
+            <div className="flex-1">
+              <label htmlFor="category-name" className="block text-sm font-bold text-gray-700 mb-1">カテゴリ名 (任意)</label>
+              <input
+                id="category-name"
+                type="text"
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
+                placeholder="例: 仕事、プライベート、アイデア"
+                className="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white"
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <label htmlFor="category-color" className="block text-sm font-bold text-gray-700 mb-1">色</label>
+              <input
+                id="category-color"
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="p-1 h-10 w-20 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer"
+                disabled={loading}
+              />
+            </div>
+          </div>
 
           {plan === "FREE" && (
             <div className="mt-4 p-3 bg-gray-100 rounded-lg text-sm text-gray-600 flex items-center gap-2">
