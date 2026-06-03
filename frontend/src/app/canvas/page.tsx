@@ -17,6 +17,8 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
+import TopicNode from "@/components/canvas/TopicNode";
+
 /**
  * Returns '#fff' or '#111' depending on whether the hex background color
  * is dark or light, so that overlaid text remains readable.
@@ -33,6 +35,10 @@ function getContrastColor(hex: string): string {
 
 const DEFAULT_NODE_COLOR = '#e5e7eb';
 
+const nodeTypes = {
+  topic: TopicNode,
+};
+
 export default function CanvasPage() {
   const [topics, setTopics] = useState<any[]>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -47,24 +53,14 @@ export default function CanvasPage() {
         // Transform DB topics into React Flow nodes
         const loadedNodes: Node[] = data.map((t: any) => ({
           id: t.id,
+          type: "topic",
           position: { x: t.positionX ?? Math.random() * 200, y: t.positionY ?? Math.random() * 200 },
           data: { 
-            label: (
-              <div className="flex flex-col items-start gap-1">
-                {t.categoryName && (
-                  <span 
-                    className="text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90" 
-                    style={{ backgroundColor: t.color || DEFAULT_NODE_COLOR, color: getContrastColor(t.color || DEFAULT_NODE_COLOR) }}
-                  >
-                    {t.categoryName}
-                  </span>
-                )}
-                <span>{t.title}</span>
-              </div>
-            ) 
+            title: t.title,
+            categoryName: t.categoryName,
+            color: t.color || DEFAULT_NODE_COLOR,
+            contrastColor: getContrastColor(t.color || DEFAULT_NODE_COLOR)
           },
-          className: "bg-white border-2 rounded-lg p-3 shadow-sm min-w-[150px] max-w-[250px] text-sm break-words",
-          style: { borderColor: t.color || DEFAULT_NODE_COLOR }
         }));
         setNodes(loadedNodes);
 
@@ -144,6 +140,7 @@ export default function CanvasPage() {
         <ReactFlow
           nodes={nodes}
           edges={edges}
+          nodeTypes={nodeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
