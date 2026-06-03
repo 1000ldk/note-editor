@@ -28,19 +28,28 @@ export default function TopicNode({ id, data }: { id: string, data: TopicNodeDat
     const hiding = isExpanded;
     const newIsExpanded = !isExpanded;
 
-    const getTargetDescendants = (node: Node, allNodes: Node[], allEdges: Edge[], isHiding: boolean) => {
-      let descendants: Node[] = [];
-      const outgoers = getOutgoers(node, allNodes, allEdges);
-      
-      outgoers.forEach((outgoer) => {
-        descendants.push(outgoer);
-        
-        // 隠す目的の場合は無条件で再帰し、開く目的の場合は子ノード自身が「開いている状態」の場合のみ再帰する
-        const outgoerExpanded = outgoer.data.isExpanded !== false;
-        if (isHiding || outgoerExpanded) {
-          descendants = descendants.concat(getTargetDescendants(outgoer, allNodes, allEdges, isHiding));
+    const getTargetDescendants = (startNode: Node, allNodes: Node[], allEdges: Edge[], isHiding: boolean) => {
+      const descendants: Node[] = [];
+      const visited = new Set<string>();
+      const stack = [startNode];
+
+      while (stack.length > 0) {
+        const current = stack.pop()!;
+        const outgoers = getOutgoers(current, allNodes, allEdges);
+
+        for (const outgoer of outgoers) {
+          if (visited.has(outgoer.id)) continue;
+
+          visited.add(outgoer.id);
+          descendants.push(outgoer);
+
+          // 隠す目的の場合は無条件で再帰し、開く目的の場合は子ノード自身が「開いている状態」の場合のみ再帰する
+          const outgoerExpanded = outgoer.data.isExpanded !== false;
+          if (isHiding || outgoerExpanded) {
+            stack.push(outgoer);
+          }
         }
-      });
+      }
       return descendants;
     };
 
@@ -88,9 +97,11 @@ export default function TopicNode({ id, data }: { id: string, data: TopicNodeDat
           
           {hasChildren && (
             <button 
+              type="button"
               onClick={toggleExpand} 
               className="p-1 -mr-1 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
               title={isExpanded ? "子ノードを隠す" : "子ノードを表示する"}
+              aria-label={isExpanded ? "子ノードを隠す" : "子ノードを表示する"}
             >
               {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             </button>
