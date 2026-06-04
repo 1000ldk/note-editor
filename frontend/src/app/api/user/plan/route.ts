@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { calculateNewRank } from "@/lib/rank-logic";
 
 export async function POST(req: Request) {
   try {
@@ -21,10 +22,8 @@ export async function POST(req: Request) {
       });
       
       // Update rank based on points
-      let newRank = user.rank;
-      if (user.points >= 100) newRank = "ゴールド";
-      else if (user.points >= 50) newRank = "シルバー";
-      
+      const newRank = calculateNewRank(user.points);
+
       if (newRank !== user.rank) {
         await prisma.user.update({
            where: { id: session.user.id },
