@@ -58,5 +58,3 @@ OPENAI_API_KEY="sk-xxxx..."
 - **原因**: PowerShellの実行ポリシー制限により、npmを実行するためのスクリプト（`npm.ps1`）がブロックされたため。
 - **対応**: PowerShellで `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` を実行し、ローカルでのスクリプト実行許可を付与して解決。
 
-
-どうやらWEB版でもVSCODEが利用でいるらしい。
