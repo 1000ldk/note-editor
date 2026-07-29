@@ -16,9 +16,13 @@ CREATE TABLE IF NOT EXISTS "RefreshToken" (
   "expiresAt" TIMESTAMP(3) NOT NULL,
   "revokedAt" TIMESTAMP(3),
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "replacedById" TEXT,
 
   CONSTRAINT "RefreshToken_pkey" PRIMARY KEY ("id")
 );
+
+-- 既に旧バージョンの001を適用済みの環境向け
+ALTER TABLE "RefreshToken" ADD COLUMN IF NOT EXISTS "replacedById" TEXT;
 
 CREATE UNIQUE INDEX IF NOT EXISTS "RefreshToken_tokenHash_key" ON "RefreshToken" ("tokenHash");
 CREATE INDEX IF NOT EXISTS "RefreshToken_userId_idx" ON "RefreshToken" ("userId");

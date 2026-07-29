@@ -115,6 +115,11 @@ model RefreshToken {
   revokedAt DateTime?
   createdAt DateTime  @default(now())
 
+  // ローテーションで発行した後継トークンのid。
+  // 猶予時間内の再送で再発行するとき、チェーン上に有効なトークンが
+  // 2本以上残らないよう後継を辿って失効させるために使う。
+  replacedById String?
+
   @@index([userId])
   @@index([expiresAt])
 }
