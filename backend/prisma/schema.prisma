@@ -9,8 +9,17 @@ datasource db {
 }
 
 // Shares the same database as frontend/prisma/schema.prisma.
-// User/Account/Session/VerificationToken/Topic/Memo must stay in sync with
-// that schema. RefreshToken is owned by this backend.
+//
+// frontend/prisma/migrations is the SINGLE source of truth for this database's
+// schema. This file exists only so the backend can generate a typed client.
+//
+// NEVER run `prisma db push` or `prisma migrate` from this directory: doing so
+// diffs this copy against the real database and will drop columns that only
+// exist in the frontend schema. RefreshToken is created via
+// prisma/sql/001_create_refresh_token.sql instead (see README).
+//
+// User/Account/Session/VerificationToken/Topic/Memo must be kept byte-for-byte
+// in sync with frontend/prisma/schema.prisma.
 
 model Account {
   id                 String  @id @default(cuid())
@@ -75,6 +84,9 @@ model Topic {
   positionX Float    @default(0)
   positionY Float    @default(0)
 
+  categoryName String?
+  color        String?
+
   parentId  String?
   parent    Topic?   @relation("TopicToTopic", fields: [parentId], references: [id])
   children  Topic[]  @relation("TopicToTopic")
@@ -102,4 +114,7 @@ model RefreshToken {
   expiresAt DateTime
   revokedAt DateTime?
   createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
