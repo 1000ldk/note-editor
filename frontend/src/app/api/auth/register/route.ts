@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { normalizeEmail } from '@/lib/normalizeEmail';
 import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
@@ -10,8 +11,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'すべての必須項目を入力してください' }, { status: 400 });
     }
 
+    // backend（iOS向けAPI）と同じ正規化を通さないと、同じアドレスで
+    // 別アカウントが作られたり、iOSからログインできなくなる。
+    const normalizedEmail = normalizeEmail(email);
+
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email: normalizedEmail }
     });
 
     if (existingUser) {
@@ -23,7 +28,7 @@ export async function POST(req: Request) {
     const user = await prisma.user.create({
       data: {
         name,
-        email,
+        email: normalizedEmail,
         password: hashedPassword,
         plan: "FREE",
         points: 0,

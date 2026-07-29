@@ -2,6 +2,7 @@
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "./prisma"
+import { normalizeEmail } from "./normalizeEmail"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
@@ -19,8 +20,9 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
         
+        // 登録時と同じ正規化を通す（backend/src/lib/authPolicy.ts と揃えること）
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: normalizeEmail(credentials.email) },
         });
 
         if (!user || !user.password) {
