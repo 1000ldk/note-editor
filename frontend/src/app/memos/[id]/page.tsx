@@ -8,6 +8,7 @@ import { Draft } from '@/types';
 import { motion } from 'motion/react';
 import { useParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import { determinePublishEndpoint, buildPublishAlertMessage } from '@/lib/publish-logic';
 
 export default function MemoEditor() {
   const params = useParams();
@@ -109,9 +110,9 @@ export default function MemoEditor() {
   const handlePublish = async () => {
     try {
       // 1. Save as PUBLISHED
-      const isCreating = !draft.id;
-      const resMemo = await fetch(isCreating ? '/api/memos' : `/api/memos/${draft.id}`, {
-        method: isCreating ? 'POST' : 'PUT',
+      const { url, method } = determinePublishEndpoint(draft.id);
+      const resMemo = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: draft.title,
@@ -121,7 +122,7 @@ export default function MemoEditor() {
       });
 
       if (!resMemo.ok) {
-        alert('メモの公開に失敗しました。');
+        alert(buildPublishAlertMessage(false, true));
         return;
       }
 
@@ -131,14 +132,14 @@ export default function MemoEditor() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'complete_memo' })
       });
-      
+
       if (!res.ok) {
         console.error('Failed to complete memo:', res.status, res.statusText);
-        alert('メモは公開されましたが、ポイントの獲得に失敗しました。');
+        alert(buildPublishAlertMessage(true, false));
         window.location.href = '/memos';
         return;
       }
-      alert('メモを公開し、10ポイントを獲得しました！');
+      alert(buildPublishAlertMessage(true, true));
       window.location.href = '/memos';
     } catch (e) {
       console.error(e);
